@@ -25,5 +25,8 @@ RUN npm install
 # Bundle app source
 COPY server.js .
 
+RUN mkdir /data
+RUN mkdir /cache
+
 EXPOSE 3001
 CMD [ "npm", "start" ]
