@@ -1,0 +1,16 @@
+{
+    "name": "sargassum-backend",
+    "version": "1.0.0",
+    "description": "API to monitor sargassum trajectories in the Ocean",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "keywords": [],
+    "author": "Jérôme Gasperi",
+    "license": "Private",
+    "dependencies": {
+      "express": "^4.21.2",
+      "duckdb": "^1.2.0"
+    }
+  }
