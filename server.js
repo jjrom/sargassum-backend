@@ -42,6 +42,10 @@ app.use(function (req, res, next) {
     next();
 });
 
+app.get("/", async (req, res) => {
+    res.status(200).json({"message":"hello"});
+});
+
 /**
  * Get forecast at a specific timestamp (YYYY-MM-DD)
  */
