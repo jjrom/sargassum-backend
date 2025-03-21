@@ -166,22 +166,23 @@ app.get("/forecast/:timestamp/volume/:eez", async (req, res) => {
                 throw err;
             }
             
-            var values = [];
-            var lastTime = rows[0].time;
-            var currentValue = 0;
-            var eez_area = rows[0].eez_area;
-            for (var i = 0, ii = rows.length; i < ii; i++) {
-                if (rows[i].time.getTime() !== lastTime.getTime()) {
-                    values.push({
-                        date:lastTime,
-                        m2PerKm2:currentValue / eez_area
-                    });
-                    lastTime = rows[i].time;
-                    currentValue = 0;
-                }
-                //currentValue += sargcToSquareMeters(rows[i].value, JSON.parse(rows[i].geometry));
-                currentValue = currentValue + (rows[i].value * 1000000);
+            if (rows.length > 0) {
+                var lastTime = rows[0].time;
+                var currentValue = 0;
+                var eez_area = rows[0].eez_area;
+                for (var i = 0, ii = rows.length; i < ii; i++) {
+                    if (rows[i].time.getTime() !== lastTime.getTime()) {
+                        values.push({
+                            date:lastTime,
+                            m2PerKm2:currentValue / eez_area
+                        });
+                        lastTime = rows[i].time;
+                        currentValue = 0;
+                    }
+                    //currentValue += sargcToSquareMeters(rows[i].value, JSON.parse(rows[i].geometry));
+                    currentValue = currentValue + (rows[i].value * 1000000);
 
+                }
             }
 
             // Construct GeoJSON FeatureCollection
