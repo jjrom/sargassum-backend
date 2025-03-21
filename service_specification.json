@@ -3,7 +3,7 @@
     "icon": "https://www.mercator-ocean.eu/wp-content/uploads/2017/06/favicon-512x512-300x300.png",
     "home": "https://github.com/jjrom/sargassum-backend",
     "keywords": ["Sargassum"],
-    "appVersion": "1.0.3",
+    "appVersion": "1.0.4",
     "servicePort": 3001,
     "customHostname": true
 }
