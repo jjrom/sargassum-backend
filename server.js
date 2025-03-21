@@ -166,6 +166,7 @@ app.get("/forecast/:timestamp/volume/:eez", async (req, res) => {
                 throw err;
             }
             
+            var values = [];
             if (rows.length > 0) {
                 var lastTime = rows[0].time;
                 var currentValue = 0;
