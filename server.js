@@ -20,7 +20,7 @@ if (!fs.existsSync(CACHE_DIR)) {
 
 // Define the forecast period
 const firstForecast = new Date("2024-01-01");
-const latestForecast = new Date("2025-02-01");
+const latestForecast = new Date("2025-03-01");
 
 // EEZ parquet file
 const eezParquetFile = MINIO_HTTPS_PATH + "eez.parquet";
@@ -40,10 +40,6 @@ app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     next();
-});
-
-app.get("/", async (req, res) => {
-    res.status(200).json({"message":"hello"});
 });
 
 /**
