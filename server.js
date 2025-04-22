@@ -102,7 +102,7 @@ app.get("/forecast/:timestamp", async (req, res) => {
                     type: 'Feature',
                     properties: {
                         time: row.time,
-                        value: row.value
+                        value: row.value / 100
                     },
                     geometry: JSON.parse(row.geometry), // Parsing GeoJSON geometry
                 }))
@@ -169,20 +169,19 @@ app.get("/forecast/:timestamp/volume/:eez", async (req, res) => {
             var values = [];
             if (rows.length > 0) {
                 var lastTime = rows[0].time;
-                var currentValue = 0;
+                var m2 = 0;
                 var eez_area = rows[0].eez_area;
                 for (var i = 0, ii = rows.length; i < ii; i++) {
                     if (rows[i].time.getTime() !== lastTime.getTime()) {
                         values.push({
                             date:lastTime,
-                            m2PerKm2:currentValue / eez_area
+                            m2:m2,
+                            m2PerKm2:m2 / eez_area
                         });
                         lastTime = rows[i].time;
-                        currentValue = 0;
+                        m2 = 0;
                     }
-                    //currentValue += sargcToSquareMeters(rows[i].value, JSON.parse(rows[i].geometry));
-                    currentValue = currentValue + (rows[i].value * 1000000);
-
+                    m2 = m2 + sargcToSquareMeters(rows[i].value / 100, JSON.parse(rows[i].geometry));
                 }
             }
 
@@ -373,7 +372,6 @@ function getSargasseParquetFile(timestamp) {
 
 }
 
-/*
 function sargcToSquareMeters(sargc, geometry) {
 
     const DEG_TO_RAD = Math.PI / 180;
@@ -395,7 +393,7 @@ function sargcToSquareMeters(sargc, geometry) {
     
     // Calculate the surface area (width * height)
     let areaKm2 = latDiffKm * lonDiffKm;
-    
-    return sargc * 1000000;
 
-}*/
+    return sargc * areaKm2 * 1000000;
+
+}

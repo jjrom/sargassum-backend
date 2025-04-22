@@ -1,6 +1,6 @@
 {
     "name": "sargassum-backend",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "API to monitor sargassum trajectories in the Ocean",
     "main": "server.js",
     "scripts": {

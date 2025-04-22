@@ -1,0 +1,15 @@
+services:
+  sargassum-backend:
+    image: jjrom/sargassum-backend:latest
+    restart: unless-stopped
+    build:
+      context: ./
+      dockerfile: ./edito.Dockerfile
+    networks:
+      - default
+    ports:
+      - 3001:3001
+    volumes:
+      - ./server.js:/usr/src/app/server.js
+      - ./data:/data
+      
