@@ -20,7 +20,6 @@ if (!fs.existsSync(CACHE_DIR)) {
 
 // Define the forecast period
 const firstForecast = new Date("2024-01-01");
-const latestForecast = new Date("2025-03-01");
 
 // EEZ parquet file
 const eezParquetFile = MINIO_HTTPS_PATH + "eez.parquet";
@@ -57,7 +56,7 @@ app.get("/forecast/:timestamp", async (req, res) => {
 
     var sargaseParquetFile;
     try {
-        sargaseParquetFile = getSargasseParquetFile(timestamp);
+        sargaseParquetFile = await getSargasseParquetFile(timestamp);
         if (!sargaseParquetFile) {
             throw new Error("Forecast not available for " + timestamp);
         }
@@ -127,7 +126,7 @@ app.get("/forecast/:timestamp/volume/:eez", async (req, res) => {
     var sargaseParquetFile;
     try {
         //sargaseParquetFile = getSargasseParquetFile(latestForecast.toISOString().split('T')[0]);
-        sargaseParquetFile = getSargasseParquetFile(timestamp);
+        sargaseParquetFile = await getSargasseParquetFile(timestamp);
     }
     catch (error) {
         res.status(404).json({ error: error.message });
@@ -345,31 +344,36 @@ function saveToCache(hash, data) {
  * 
  * @param {string} timestamp as YYYY-MM-DD
  */
-function getSargasseParquetFile(timestamp) {
+async function getSargasseParquetFile(timestamp) {
 
-    var endOfLatestForecast = new Date(latestForecast.getTime());
-    endOfLatestForecast.setMonth(endOfLatestForecast.getMonth() + 7);
-
+    var requested = new Date(timestamp);
     var d = new Date(timestamp);
-    if (parseInt(timestamp.split('-')[2]) < 16) {
-        d.setMonth(d.getMonth() - 1);
-    }
     if (d < firstForecast) {
         throw new Error("Forecast not available before " + firstForecast.toISOString().split('T')[0]);
-    }
-    if (d > endOfLatestForecast) {
-        throw new Error("Forecast not available after " + endOfLatestForecast.toISOString().split('T')[0]);
     }
 
     // Best forecast is the closest first of the month
     d.setDate(1);
-    if (d > latestForecast) {
-        d = latestForecast;
+
+    var endOfLatestForecast = new Date(d.getTime());
+    endOfLatestForecast.setMonth(endOfLatestForecast.getMonth() + 7);
+
+    var url = MINIO_HTTPS_PATH + d.toISOString().split('T')[0].split('-').slice(0, 2).join('') + "01" + "_sarg_mean.parquet";
+
+    while (d > firstForecast) {
+        if (await urlExist(url)) {
+            if (requested > endOfLatestForecast) {
+                throw new Error("Forecast not available after " + endOfLatestForecast.toISOString().split('T')[0]);
+            }
+            return url;
+        }
+        d.setMonth(d.getMonth() - 1);
+        endOfLatestForecast = new Date(d.getTime());
+        endOfLatestForecast.setMonth(d.getMonth() + 7);
+        url = MINIO_HTTPS_PATH + d.toISOString().split('T')[0].split('-').slice(0, 2).join('') + "01" + "_sarg_mean.parquet";
+        console.log("Trying " + url);
     }
-    var goodForecast = d.toISOString().split('T')[0].split('-').slice(0, 2).join('') + "01";
-
-    return MINIO_HTTPS_PATH + goodForecast + "_sarg_mean.parquet";
-
+    throw new Error("Forecast not available for " + timestamp);
 }
 
 function sargcToSquareMeters(sargc, geometry) {
@@ -396,4 +400,14 @@ function sargcToSquareMeters(sargc, geometry) {
 
     return sargc * areaKm2 * 1000000;
 
+}
+
+async function urlExist(url) {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        return response.status === 200 ? true : false;
+    }
+    catch (error) {
+        return false;
+    }
 }
